@@ -1,0 +1,64 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: #fafafa;
+  --color-foreground: #0a0a0b;
+  --color-muted: #71717a;
+  --color-muted-foreground: #a1a1aa;
+  --color-border: #e4e4e7;
+  --color-card: #ffffff;
+  --color-primary: #5b5fc7;
+  --color-primary-foreground: #ffffff;
+  --color-accent: #7c3aed;
+  --color-accent-soft: #ede9fe;
+  --color-surface: #f4f4f5;
+  --color-glass: rgba(255, 255, 255, 0.72);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    @apply border-border;
+  }
+
+  html {
+    @apply scroll-smooth antialiased;
+  }
+
+  body {
+    @apply min-h-screen bg-background font-sans text-foreground;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-linear-to-r from-[#5b5fc7] via-[#7c3aed] to-[#6366f1] bg-clip-text text-transparent;
+  }
+
+  .glass {
+    background: var(--color-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .gradient-mesh {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(91, 95, 199, 0.15), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(124, 58, 237, 0.08), transparent),
+      radial-gradient(ellipse 50% 30% at 0% 50%, rgba(99, 102, 241, 0.06), transparent);
+  }
+}
