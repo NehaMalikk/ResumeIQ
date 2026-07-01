@@ -13,7 +13,7 @@ export function TestimonialsSection() {
         <SectionHeader
           badge="Testimonials"
           title="Trusted by ambitious professionals"
-          description="Join thousands of candidates who've improved their resumes and accelerated their job search with HireMatch AI."
+          description="Join thousands of candidates who've improved their resumes and accelerated their job search with ResumeIQ."
         />
 
         <div className="mt-16 grid gap-5 sm:grid-cols-2">

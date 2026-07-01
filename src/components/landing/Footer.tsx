@@ -2,7 +2,7 @@ import { Code2, Mail, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const footerLinks = [
-  { label: 'Contact', href: 'mailto:hello@hirematch.ai', icon: Mail },
+  { label: 'Contact', href: 'mailto:hello@resumeiq.com', icon: Mail },
   { label: 'GitHub', href: 'https://github.com', icon: Code2 },
 ] as const
 
@@ -19,12 +19,12 @@ export function Footer() {
               <Sparkles className="size-4 text-white" aria-hidden />
             </div>
             <span className="text-sm font-semibold">
-              HireMatch <span className="text-primary">AI</span>
+              Resume<span className="text-primary">IQ</span>
             </span>
           </Link>
 
           <div className="flex flex-col items-center gap-1 sm:items-end">
-            <p className="text-xs text-muted">© 2026 HireMatch AI</p>
+            <p className="text-xs text-muted">© 2026 ResumeIQ</p>
             <p className="text-xs text-muted-foreground">
               Built for learning & experimentation
             </p>

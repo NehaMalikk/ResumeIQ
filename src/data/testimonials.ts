@@ -8,7 +8,7 @@ export const testimonials: Testimonial[] = [
     company: 'Stripe',
     avatar: 'SC',
     content:
-      'HireMatch AI helped me tailor my resume for three roles in one afternoon. My ATS score went from 62 to 91 — I landed interviews within a week.',
+      'ResumeIQ helped me tailor my resume for three roles in one afternoon. My ATS score went from 62 to 91 — I landed interviews within a week.',
     rating: 5,
   },
   {

@@ -1,4 +1,4 @@
-# HireMatch AI
+# ResumeIQ
 
 AI-powered resume analyzer frontend — premium SaaS landing experience built with React, TypeScript, and Tailwind CSS.
 
@@ -16,7 +16,7 @@ AI-powered resume analyzer frontend — premium SaaS landing experience built wi
 ## Getting Started
 
 ```bash
-cd hirematch-ai
+cd resumeiq
 npm install
 npm run dev
 ```

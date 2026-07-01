@@ -13,7 +13,7 @@ export function FeaturesSection() {
         <SectionHeader
           badge="Features"
           title="Everything you need to land the interview"
-          description="From ATS compatibility to AI rewrites — HireMatch AI gives you a complete toolkit to tailor every application."
+          description="From ATS compatibility to AI rewrites — ResumeIQ gives you a complete toolkit to tailor every application."
         />
 
         <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

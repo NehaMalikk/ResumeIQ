@@ -16,7 +16,7 @@ export function Navbar() {
             <Sparkles className="size-4 text-white" aria-hidden />
           </div>
           <span className="text-sm font-semibold tracking-tight">
-            HireMatch <span className="text-primary">AI</span>
+            Resume<span className="text-primary">IQ</span>
           </span>
         </Link>
 
