@@ -1,52 +1,69 @@
-# ResumeIQ
+# HireMatch AI
 
-AI-powered resume analyzer frontend — premium SaaS landing experience built with React, TypeScript, and Tailwind CSS.
+AI-powered resume analyzer — full-stack monorepo with a React frontend and FastAPI backend.
 
-## Tech Stack
+## Repository Structure
 
-- React 19 + TypeScript
-- Tailwind CSS v4
-- shadcn/ui patterns (Button, Card, Badge)
-- Framer Motion
-- Lucide React
-- Recharts (ready for dashboard charts)
-- Zustand
-- React Router v7
+```
+HIREMATCH-AI/
+├── frontend/          # React + TypeScript + Vite + TailwindCSS + shadcn/ui
+├── backend/           # Python 3.12 + FastAPI + SQLAlchemy
+│   ├── app/           # Application layer (API, services, schemas)
+│   └── ai_engine/     # ML/NLP pipeline modules (placeholders)
+├── docs/              # Project documentation
+└── README.md          # This file
+```
 
-## Getting Started
+## Quick Start
+
+### Frontend
 
 ```bash
-cd resumeiq
+cd frontend
 npm install
 npm run dev
 ```
 
 Open [http://localhost:5173](http://localhost:5173).
 
-## Project Structure
+### Backend
 
+```bash
+cd backend
+python -m venv .venv
+
+# Windows
+.\.venv\Scripts\Activate.ps1
+
+# macOS / Linux
+source .venv/bin/activate
+
+pip install -r requirements.txt
+cp .env.example .env
+python main.py
 ```
-src/
-├── components/   # UI + landing sections
-├── pages/        # Route pages
-├── layouts/      # Page layouts
-├── hooks/        # Custom hooks
-├── store/        # Zustand stores
-├── services/     # API layer (backend-ready)
-├── utils/        # Utilities (cn, etc.)
-├── data/         # Mock JSON data
-├── assets/       # Static assets
-└── types/        # TypeScript types
-```
 
-## Environment
+Open [http://localhost:8000](http://localhost:8000) — API docs at [http://localhost:8000/docs](http://localhost:8000/docs).
 
-| Variable | Description |
-|----------|-------------|
-| `VITE_API_BASE_URL` | Backend API base URL (default: `/api`) |
+## Documentation
 
-## Scripts
+- [Project Vision](docs/PROJECT_VISION.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Backend README](backend/README.md)
+- [Frontend README](frontend/README.md)
 
-- `npm run dev` — Start dev server
-- `npm run build` — Production build
-- `npm run preview` — Preview production build
+## Development
+
+Run both services concurrently during development:
+
+| Service  | URL                        | Command              |
+|----------|----------------------------|----------------------|
+| Frontend | http://localhost:5173      | `npm run dev`        |
+| Backend  | http://localhost:8000      | `python main.py`     |
+
+Set `VITE_API_BASE_URL=http://localhost:8000` in `frontend/.env` when connecting the frontend to the backend.
+
+## License
+
+Private — All rights reserved.
