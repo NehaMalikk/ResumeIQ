@@ -31,7 +31,10 @@ Example University
     assert resume.personal_info.name == "John Doe"
     assert resume.personal_info.email == "john@example.com"
     assert resume.personal_info.linkedin == "https://linkedin.com/in/johndoe"
-    assert resume.skills == ["Python", "FastAPI", "Docker", "PostgreSQL"]
+    assert [(skill.name, skill.category) for skill in resume.skills] == [
+        ("Python", "Programming Language"), ("FastAPI", "Framework"),
+        ("Docker", "DevOps"), ("PostgreSQL", "Database"),
+    ]
     assert resume.experience[0].company == "ABC Technologies"
     assert resume.experience[0].title == "Backend Developer"
     assert resume.experience[0].start_date == "Jan 2022"
@@ -60,7 +63,10 @@ English - Fluent, Hindi (Native)
 """
     )
 
-    assert resume.skills == ["Python", "pandas", "scikit-learn"]
+    assert [(skill.name, skill.category) for skill in resume.skills] == [
+        ("Python", "Programming Language"), ("Pandas", "Data Science"),
+        ("Scikit-Learn", "Machine Learning"),
+    ]
     assert resume.projects[0].name == "Customer Churn Predictor"
     assert resume.projects[0].technologies == ["Python", "pandas", "scikit-learn"]
     assert resume.certifications[0].name == "Machine Learning Specialization"
@@ -98,7 +104,7 @@ Seeking a platform engineering role.
 def test_recognizes_case_and_whitespace_variations_in_headings() -> None:
     resume = ResumeParser().parse("Pat Lee\n\n   tEcHnIcAl    sKiLlS :  \nGo\nRust\n\n EMPLOYMENT \nAcme\nEngineer")
 
-    assert resume.skills == ["Go", "Rust"]
+    assert [skill.name for skill in resume.skills] == ["Go", "Rust"]
     assert resume.experience[0].company == "Acme"
 
 

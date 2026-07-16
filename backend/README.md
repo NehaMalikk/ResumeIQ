@@ -218,6 +218,24 @@ print(resume.skills)
 
 Resume formatting varies substantially. This module uses transparent heuristics and regular expressions, so multi-column extraction artifacts, unconventional headings, or entries without separators can reduce field precision. Missing or ambiguous data remains empty or is preserved as descriptive content. It never raises for empty, malformed, or non-string input.
 
+## Skill Extraction & Normalization Engine (Milestone 3)
+
+`ai_engine/extraction/SkillExtractor` is a reusable, deterministic engine for finding known technical skills in plain text from any source. It does not use embeddings, LLMs, scoring, or semantic matching.
+
+The built-in vocabulary covers programming languages, frameworks, databases, cloud, DevOps, testing, data science, machine learning, AI, security, mobile development, and engineering tools. `SkillNormalizer` maps known aliases and variants such as `py` to `Python`, `ReactJS` to `React`, `Postgres` to `PostgreSQL`, and `AWS Cloud` to `AWS`. Matching is case-insensitive, prefers the longest match, and returns each canonical skill only once in first-occurrence order.
+
+`categories.py` provides `categorize(skill)`, which maps a canonical skill to its category. `ResumeParser` applies this engine only to its existing Skills section and exposes categorized `ResumeSkill` objects:
+
+```python
+from ai_engine.extraction import ResumeParser
+
+resume = ResumeParser().parse("""Skills
+Python, py, FastAPI, Docker, AWS Cloud, Postgres
+""")
+print(resume.skills[0].model_dump())
+# {"name": "Python", "category": "Programming Language"}
+```
+
 ## Project Structure
 
 ```

@@ -15,8 +15,11 @@ from ai_engine.extraction.models import (
     ResumeExperience,
     ResumeLanguage,
     ResumeProject,
+    ResumeSkill,
 )
 from ai_engine.extraction.patterns import DATE_RANGE_PATTERN, DATE_PATTERN, EMAIL_PATTERN, GITHUB_PATTERN, LINKEDIN_PATTERN, PHONE_PATTERN, URL_PATTERN
+from ai_engine.extraction.categories import categorize
+from ai_engine.extraction.skill_extractor import SkillExtractor
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +31,9 @@ class ResumeParser:
     conventional headings and preserves ambiguous content instead of making
     unsupported semantic inferences.
     """
+
+    def __init__(self, skill_extractor: SkillExtractor | None = None) -> None:
+        self._skill_extractor = skill_extractor or SkillExtractor()
 
     def parse(self, text: str) -> Resume:
         """Parse ``text`` safely, returning empty fields when data is absent."""
@@ -79,8 +85,15 @@ class ResumeParser:
         value = " ".join(self._content_lines(lines))
         return value or None
 
-    def extract_skills(self, lines: list[str]) -> list[str]:
-        """Split skill lines and common delimiters while preserving multi-word skills."""
+    def extract_skills(self, lines: list[str]) -> list[ResumeSkill]:
+        """Extract normalized, categorized skills from the skills section."""
+        skills = self._skill_extractor.extract("\n".join(self._content_lines(lines)))
+        result = [ResumeSkill(name=skill, category=category) for skill in skills if (category := categorize(skill))]
+        logger.info("Skill categories assigned: %s", ", ".join(item.category for item in result) or "none")
+        return result
+
+    def extract_raw_skills(self, lines: list[str]) -> list[str]:
+        """Split source skill lines; retained for callers needing raw text."""
         values: list[str] = []
         for line in self._content_lines(lines):
             cleaned = re.sub(r"^(?:skills?|technologies)\s*:\s*", "", line, flags=re.IGNORECASE)

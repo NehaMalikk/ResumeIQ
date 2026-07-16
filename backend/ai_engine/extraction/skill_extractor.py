@@ -1,33 +1,39 @@
-"""Skill and competency extraction from resumes and job descriptions.
+"""Deterministic extraction of normalized technical skills from plain text."""
 
-Future responsibilities include:
+from __future__ import annotations
 
-- Skill taxonomy mapping (ESCO, O*NET, custom ontologies)
-- Synonym and alias resolution (e.g., "JS" → "JavaScript")
-- Soft skill vs. hard skill classification
-- Proficiency level inference
-- Emerging technology detection
-"""
+import logging
+import re
 
-from typing import Any
+from ai_engine.extraction.normalizer import SkillNormalizer
+from ai_engine.extraction.skill_dictionary import SKILL_ALIASES, SKILL_CATEGORIES
+
+logger = logging.getLogger(__name__)
 
 
 class SkillExtractor:
-    """Extract and normalize skills from unstructured text."""
+    """Extract known technical skills without semantic, AI, or ML matching."""
 
-    def extract(self, text: str) -> list[dict[str, Any]]:
-        """Identify skills mentioned in the given text.
+    def __init__(self, normalizer: SkillNormalizer | None = None) -> None:
+        self._normalizer = normalizer or SkillNormalizer()
+        alternatives = "|".join(re.escape(term) for term in sorted([*SKILL_CATEGORIES, *SKILL_ALIASES], key=len, reverse=True))
+        self._pattern = re.compile(rf"(?<![A-Za-z0-9+#.])(?:{alternatives})(?![A-Za-z0-9+#.])", re.IGNORECASE)
 
-        Args:
-            text: Resume or job description text.
-
-        Returns:
-            List of extracted skills with metadata (name, category, confidence).
-
-        Raises:
-            NotImplementedError: Skill extraction is not yet implemented.
-        """
-        # TODO: Maintain a skill ontology / knowledge graph
-        # TODO: Use embedding similarity for fuzzy skill matching
-        # TODO: Infer implicit skills from job titles and project descriptions
-        raise NotImplementedError("Skill extraction is not yet implemented")
+    def extract(self, text: str) -> list[str]:
+        """Return unique canonical skills in their first-occurrence order."""
+        logger.info("Skill extraction started")
+        if not isinstance(text, str) or not text.strip():
+            logger.info("Skills detected: none")
+            logger.info("Skill extraction complete")
+            return []
+        detected: list[str] = []
+        seen: set[str] = set()
+        for match in self._pattern.finditer(text):
+            canonical = self._normalizer.normalize(match.group())
+            if canonical and canonical not in seen:
+                seen.add(canonical)
+                detected.append(canonical)
+        logger.info("Skills detected: %s", ", ".join(detected) or "none")
+        logger.info("Normalization complete")
+        logger.info("Skill extraction complete")
+        return detected

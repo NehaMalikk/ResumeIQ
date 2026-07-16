@@ -67,12 +67,19 @@ class ResumeLanguage(ResumeModel):
     proficiency: str | None = None
 
 
+class ResumeSkill(ResumeModel):
+    """A normalized technical skill and its vocabulary category."""
+
+    name: str
+    category: str
+
+
 class Resume(ResumeModel):
     """Structured representation of a resume without scoring or matching data."""
 
     personal_info: PersonalInfo = Field(default_factory=PersonalInfo)
     summary: str | None = None
-    skills: list[str] = Field(default_factory=list)
+    skills: list[ResumeSkill] = Field(default_factory=list)
     experience: list[ResumeExperience] = Field(default_factory=list)
     projects: list[ResumeProject] = Field(default_factory=list)
     education: list[ResumeEducation] = Field(default_factory=list)
