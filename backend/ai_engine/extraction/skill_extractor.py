@@ -17,7 +17,9 @@ class SkillExtractor:
     def __init__(self, normalizer: SkillNormalizer | None = None) -> None:
         self._normalizer = normalizer or SkillNormalizer()
         alternatives = "|".join(re.escape(term) for term in sorted([*SKILL_CATEGORIES, *SKILL_ALIASES], key=len, reverse=True))
-        self._pattern = re.compile(rf"(?<![A-Za-z0-9+#.])(?:{alternatives})(?![A-Za-z0-9+#.])", re.IGNORECASE)
+        # A period may be ordinary sentence punctuation after a skill (for
+        # example, ``Postgres.``), so it must not block the final boundary.
+        self._pattern = re.compile(rf"(?<![A-Za-z0-9+#.])(?:{alternatives})(?![A-Za-z0-9+#])", re.IGNORECASE)
 
     def extract(self, text: str) -> list[str]:
         """Return unique canonical skills in their first-occurrence order."""

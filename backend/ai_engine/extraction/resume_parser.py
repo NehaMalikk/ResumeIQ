@@ -168,7 +168,7 @@ class ResumeParser:
 
     @staticmethod
     def _section_name(line: str) -> str | None:
-        candidate = line.strip().rstrip(":").casefold()
+        candidate = line.strip().rstrip(":").strip().casefold()
         candidate = re.sub(r"\s+", " ", candidate)
         if len(candidate) > MAX_HEADING_LENGTH:
             return None

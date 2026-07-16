@@ -236,6 +236,36 @@ print(resume.skills[0].model_dump())
 # {"name": "Python", "category": "Programming Language"}
 ```
 
+## Job Description Structure Extraction (Milestone 4)
+
+`ai_engine/extraction/JobDescriptionParser` turns plain UTF-8 job-description text into a deterministic Pydantic `JobDescription`. It sits directly after document processing and before the future Feature Engineering module. It does not perform feature engineering, embeddings, matching, ATS scoring, recommendations, or use an LLM.
+
+```
+plain extracted job-description text
+        |
+        v
+JobDescriptionParser.parse(text)
+        +-- heading and list detection
+        +-- salary, experience, location, employment/contact extraction
+        +-- shared SkillExtractor normalization and categories
+        v
+JobDescription (ready for future Feature Engineering)
+```
+
+The model preserves title, company, location, employment type, department, experience and education requirements, categorized required/preferred/nice-to-have `JobSkill` lists, individual responsibilities, qualifications, benefits, certifications, salary, URLs/emails, keywords, and `raw_text`. `JobRequirement`, `JobResponsibility`, and `JobBenefit` each preserve one source item rather than collapsing a list into a paragraph.
+
+Supported headings are case-insensitive and allow excess whitespace, a trailing colon, bullets, and numbered lists. They include Job Title, About Us/About the Role, Responsibilities, Requirements, Required Skills, Preferred Skills, Nice to Have, Qualifications, Education, Experience, Benefits, Salary, Location, Employment Type, and Department, along with common aliases.
+
+Skills always come from the existing reusable `SkillExtractor`; the JD parser only assigns the existing vocabulary category through `categorize`. This keeps normalization logic in one place and gives future feature engineering stable, categorized inputs.
+
+```python
+from ai_engine.extraction import JobDescriptionParser
+
+job = JobDescriptionParser().parse(extracted_text)
+print(job.required_skills)
+print(job.responsibilities)
+```
+
 ## Project Structure
 
 ```
