@@ -179,6 +179,45 @@ Image parsing requires the [Tesseract OCR](https://github.com/tesseract-ocr/tess
 
 `.docx` files are parsed with `python-docx`. Legacy `.doc` files use a best-effort binary decode; for production reliability, prefer DOCX or PDF uploads.
 
+## Resume Structure Extraction (Milestone 2)
+
+`ai_engine/extraction/ResumeParser` converts the plain UTF-8 text produced by the Document Processing Engine into a Pydantic `Resume` object. It is a deterministic structure parser only: it does not score a resume, compare it with a job description, use embeddings, or call an LLM.
+
+### Architecture
+
+```
+plain extracted text
+        |
+        v
+ResumeParser.parse(text)
+        |
+        +-- section detection (normalized conventional headings)
+        +-- regex contact/date/URL extraction
+        +-- focused section parsers
+        v
+Resume (Pydantic model)
+```
+
+The parser is split into small methods for personal information, summary, skills, experience, projects, education, certifications, and languages. `patterns.py` holds compiled regular expressions, `constants.py` holds supported heading aliases, and `models.py` defines the public Pydantic data model.
+
+### Supported Sections and Models
+
+Recognized headings include Summary/Professional Summary/Objective, Skills/Technical Skills, Experience/Work Experience/Employment/Volunteer Experience, Projects/Academic Projects, Education/Qualifications, Certifications/Achievements, and Languages. Heading matching is case-insensitive and tolerates extra whitespace and a trailing colon.
+
+`Resume` contains `personal_info`, `summary`, `skills`, `experience`, `projects`, `education`, `certifications`, `languages`, and the original `raw_text`. Nested models are `PersonalInfo`, `ResumeExperience`, `ResumeEducation`, `ResumeProject`, `ResumeCertification`, and `ResumeLanguage`.
+
+```python
+from ai_engine.extraction import ResumeParser
+
+resume = ResumeParser().parse(extracted_text)
+print(resume.personal_info.email)
+print(resume.skills)
+```
+
+### Limitations
+
+Resume formatting varies substantially. This module uses transparent heuristics and regular expressions, so multi-column extraction artifacts, unconventional headings, or entries without separators can reduce field precision. Missing or ambiguous data remains empty or is preserved as descriptive content. It never raises for empty, malformed, or non-string input.
+
 ## Project Structure
 
 ```
