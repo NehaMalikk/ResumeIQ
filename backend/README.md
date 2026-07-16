@@ -9,6 +9,7 @@ Production-ready FastAPI backend for the HireMatch AI resume analyzer platform.
 - Pydantic v2 + pydantic-settings
 - SQLAlchemy 2.x + Alembic
 - Pytest + httpx
+- pdfplumber, python-docx, Pillow, pytesseract (document parsing)
 
 ## Quick Start
 
@@ -90,6 +91,94 @@ Interactive docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 pytest -v
 ```
 
+Run parser tests only:
+
+```bash
+pytest tests/parsers -v
+```
+
+## Document Processing Engine
+
+The `ai_engine/parsers/` package extracts **plain UTF-8 text** from uploaded resume and job description files. It performs no analysis, scoring, or AI processing.
+
+### Supported Formats
+
+| Use Case | Formats |
+|----------|---------|
+| Resume uploads | PDF, DOC, DOCX, PNG, JPG, JPEG |
+| Job descriptions | Plain text, PDF, DOC, DOCX, PNG, JPG, JPEG |
+
+### Parser Architecture
+
+```
+Upload file
+    │
+    ▼
+ParserFactory.get_parser(file)   ← detect extension
+    │
+    ├── .pdf   → PDFParser
+    ├── .doc   → DocumentParser
+    ├── .docx  → DocumentParser
+    ├── .png   → ImageParser
+    ├── .jpg   → ImageParser
+    ├── .jpeg  → ImageParser
+    └── .txt   → TextParser
+    │
+    ▼
+extract_text(...) → plain UTF-8 string
+```
+
+Each parser is a single-responsibility class. Shared errors live in `exceptions.py`:
+
+- `InvalidFileType` — unsupported file extension
+- `DocumentParsingError` — unreadable, empty, or corrupted documents
+- `OCRFailure` — OCR-specific image extraction failures
+
+Logging uses the application logger (`app.core.logging.get_logger`) and records the file name, parser class, and success or failure details.
+
+### Using Parsers
+
+**Automatic parser selection:**
+
+```python
+from pathlib import Path
+
+from ai_engine.parsers import ParserFactory, TextParser
+
+file_path = Path("uploads/resume.pdf")
+parser = ParserFactory.get_parser(file_path)
+text = parser.extract_text(str(file_path))
+```
+
+**Plain text job descriptions:**
+
+```python
+from ai_engine.parsers import TextParser
+
+parser = TextParser()
+clean_jd = parser.extract_text(raw_job_description_text)
+```
+
+For `.txt` files, read the file contents first, then pass the string to `TextParser.extract_text`.
+
+**Direct parser usage:**
+
+```python
+from ai_engine.parsers import PDFParser, DocumentParser, ImageParser
+
+pdf_text = PDFParser().extract_text("resume.pdf")
+doc_text = DocumentParser().extract_text("resume.docx")
+image_text = ImageParser().extract_text("scan.png")
+```
+
+### OCR Prerequisites
+
+Image parsing requires the [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) engine installed on the host system and available on `PATH`. On Windows, install Tesseract and ensure `tesseract.exe` is discoverable by `pytesseract`.
+
+### Legacy DOC Files
+
+`.docx` files are parsed with `python-docx`. Legacy `.doc` files use a best-effort binary decode; for production reliability, prefer DOCX or PDF uploads.
+
 ## Project Structure
 
 ```
@@ -167,5 +256,5 @@ alembic upgrade head
 1. Wire `AnalysisService` to the `ai_engine.inference.Predictor` pipeline
 2. Add multipart file upload handling to `POST /analyze`
 3. Define SQLAlchemy models and run Alembic migrations
-4. Implement document parsers in `ai_engine/parsers/`
+4. ~~Implement document parsers in `ai_engine/parsers/`~~ (Milestone 1 complete)
 5. Connect frontend `VITE_API_BASE_URL` to `http://localhost:8000`
