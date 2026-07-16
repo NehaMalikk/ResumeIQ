@@ -266,6 +266,34 @@ print(job.required_skills)
 print(job.responsibilities)
 ```
 
+## Explainable Feature Engineering (Milestone 5)
+
+`ai_engine/features/FeatureBuilder` converts parsed `Resume` and `JobDescription` models into independent, deterministic feature vectors. Every output is a `FeatureValue` with a `value`, `source`, `confidence`, and optional metadata, preserving exactly where future explanations can trace the value.
+
+```
+Resume / JobDescription model
+        |
+        v
+FeatureBuilder
+        +-- deterministic counts, category grouping, degree normalization
+        +-- explicit experience parsing, word/page estimation
+        +-- transparent technical-strength heuristic (0.0 to 1.0)
+        v
+ResumeFeatures / JobDescriptionFeatures
+        |
+        v
+future Semantic Matching (not implemented here)
+```
+
+`ResumeFeatures` includes skills grouped by category, experience, education, section completeness, technical strength, document size, and counts. `JobDescriptionFeatures` includes required/preferred/nice-to-have skills, minimum experience, education, responsibility, and keyword features. The builder does not compare documents, score candidates, use embeddings, or call ML/LLM services; future Semantic Matching can consume these typed vectors directly.
+
+```python
+from ai_engine.features import FeatureBuilder
+
+features = FeatureBuilder().build_resume_features(resume)
+print(features.technical_strength.model_dump())
+```
+
 ## Project Structure
 
 ```
