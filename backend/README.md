@@ -334,6 +334,38 @@ The default deterministic plugins cover skills, experience, education, projects,
 
 The `SemanticComparator` is a zero-confidence placeholder only. No embedding model, similarity calculation, AI, ATS score, or recommendation is implemented in this milestone.
 
+## ATS Scoring Engine (Milestone 7)
+
+`ai_engine/scoring/ATSScoringEngine` converts a `ComparisonResult` into an immutable, explainable `ATSScore`. It is entirely deterministic: it consumes the existing per-category comparison metrics and performs no AI, embeddings, semantic model calls, or external API requests.
+
+```
+ComparisonResult (0--100 comparator metrics)
+                  |
+                  v
+          ATSScoringEngine
+                  |
+                  +-- validate/normalize configurable weights
+                  +-- clamp malformed metric values safely
+                  +-- calculate weighted contributions
+                  +-- calculate output-coverage confidence
+                  v
+ATSScore (overall score, category scores, explanation, warnings)
+```
+
+The default weights are Skills 30%, Experience 25%, Education 10%, Projects 10%, Certifications 5%, Keywords 10%, Responsibilities 5%, and Semantic 5%. Pass `ScoringWeights(values={...})` to configure them. Values may be proportions or whole-number percentages; invalid, negative, missing, or all-zero weights are safely replaced with defaults and noted in `warnings`.
+
+`confidence` is 0.0--1.0 and combines the proportion of the eight expected comparator outputs with their reported comparator confidences. Missing and malformed comparison output therefore still produces a valid result, with a lower confidence and explicit warnings. Every category and aggregate score is clamped to its valid range.
+
+`score_breakdown.explanation` is frontend-ready text showing each category's earned weighted points and maximum contribution:
+
+```python
+from ai_engine.scoring import ATSScoringEngine
+
+ats_score = ATSScoringEngine().score(comparison_result)
+print(ats_score.overall_score)
+print(ats_score.score_breakdown.explanation)
+```
+
 ## Project Structure
 
 ```

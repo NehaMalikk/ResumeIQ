@@ -1,5 +1,7 @@
-"""ATS scoring modules."""
+"""Deterministic, explainable ATS scoring modules."""
 
-from ai_engine.scoring.ats_score import ATSScorer
+from ai_engine.scoring.ats_scoring_engine import ATSScoringEngine
+from ai_engine.scoring.scoring_config import DEFAULT_SCORING_WEIGHTS, ScoringWeights
+from ai_engine.scoring.scoring_models import ATSScore
 
-__all__ = ["ATSScorer"]
+__all__ = ["ATSScore", "ATSScoringEngine", "DEFAULT_SCORING_WEIGHTS", "ScoringWeights"]
