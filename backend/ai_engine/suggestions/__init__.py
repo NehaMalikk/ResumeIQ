@@ -1,5 +1,6 @@
-"""Recommendation and suggestion engines."""
+"""Reserved namespace for future non-recommendation suggestion utilities.
 
-from ai_engine.suggestions.recommendation_engine import RecommendationEngine
+The canonical deterministic recommendation API is ``ai_engine.recommendations``.
+"""
 
-__all__ = ["RecommendationEngine"]
+__all__: list[str] = []

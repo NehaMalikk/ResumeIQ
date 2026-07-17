@@ -366,6 +366,37 @@ print(ats_score.overall_score)
 print(ats_score.score_breakdown.explanation)
 ```
 
+## Explainable Recommendation Engine (Milestone 8)
+
+`ai_engine/recommendations/RecommendationEngine` turns a `ComparisonResult` and finalized `ATSScore` into a frontend-ready `RecommendationReport`. It is deterministic and rule-based: it uses no generative AI, LLMs, embeddings, semantic model inference, or external APIs.
+
+```
+ComparisonResult + ATSScore
+             |
+             v
+     RecommendationEngine
+             |
+             +-- prioritized improvements
+             +-- strengths
+             +-- missing skills and keywords
+             +-- section feedback and warnings
+```
+
+The frozen report models expose `recommendations`, separate positive `strengths`, `missing_skills`, `keyword_suggestions`, concise `section_feedback`, and frontend-safe `warnings`. Recommendations use evidence from comparison metrics and use finalized ATS component scores for priority. They cover skills, experience, education, projects, certifications, keywords, and responsibilities; optional education and certification feedback appears only when the metric supplies meaningful requirement evidence.
+
+Priorities are `critical`, `high`, `medium`, and `low` by score band, while scores of 85 or above produce separate `positive` strengths. Within a priority, ranking follows configured category importance, score, and stable ID. Case-insensitive deduplication is applied before configured limits; a warning is retained when important findings are truncated. Missing semantic output is a safe availability warning, never a candidate weakness.
+
+```python
+from ai_engine.recommendations import RecommendationEngine
+
+report = RecommendationEngine().generate(comparison_result, ats_score)
+print(report.summary)
+for recommendation in report.recommendations:
+    print(recommendation.title, recommendation.evidence)
+```
+
+The engine is intentionally independent from FastAPI and the analysis pipeline. A future, opt-in LLM enhancement could improve wording, but should retain these deterministic evidence and safety boundaries.
+
 ## Project Structure
 
 ```
