@@ -294,6 +294,46 @@ features = FeatureBuilder().build_resume_features(resume)
 print(features.technical_strength.model_dump())
 ```
 
+## Comparison Engine (Milestone 6)
+
+`ai_engine/comparison/ComparisonEngine` compares independent `ResumeFeatures` and `JobDescriptionFeatures` using small, deterministic plugins. It produces a `ComparisonResult` containing each `ComparisonMetric` separately plus a weighted aggregate. A metric records its name, 0–100 score, matched/missing/extra items where available, explanatory details, confidence, and metadata.
+
+```
+ResumeFeatures + JobDescriptionFeatures
+                 |
+                 v
+          ComparisonEngine
+                 |
+     +-----------+------------+
+     | registered comparator plugins |
+     +-- skills, experience, education
+     +-- projects, certifications, keywords
+     +-- responsibilities
+                 |
+                 v
+     ComparisonResult (metrics + weighted score)
+```
+
+Plugins inherit `BaseComparator` and implement `compare(resume_features, jd_features)`. Pass an iterable of comparator instances to `ComparisonEngine` to add, replace, or remove plugins without changing the engine. `ComparisonWeights` centrally configures aggregation; comparator logic does not own weights. Execution time is retained in each metric's metadata and failures are logged without preventing other plugins from running.
+
+`SemanticComparator` is deliberately only a placeholder extension point with zero confidence. It downloads no models and performs no embedding, cosine-similarity, AI, or ML work. Future semantic matching can be introduced as a new plugin while preserving the same `ComparisonMetric` contract.
+
+```python
+from ai_engine.comparison import ComparisonEngine
+
+result = ComparisonEngine().compare(resume_features, job_features)
+print(result.overall_score)
+print(result.metrics[0].model_dump())
+```
+
+## Comparison Engine (Milestone 6)
+
+`ai_engine/comparison/ComparisonEngine` compares independently generated `ResumeFeatures` and `JobDescriptionFeatures` through registered comparator plugins. Each plugin implements the `BaseComparator.compare(...)` contract and returns a traceable `ComparisonMetric` with score, matched/missing/extra items, details, confidence, and metadata.
+
+The default deterministic plugins cover skills, experience, education, projects, certifications, keywords, and responsibility evidence. `ComparisonWeights` holds aggregation weights separately from comparator behavior. Plugins can be supplied to the engine constructor, enabling new comparison strategies without modifying orchestration.
+
+The `SemanticComparator` is a zero-confidence placeholder only. No embedding model, similarity calculation, AI, ATS score, or recommendation is implemented in this milestone.
+
 ## Project Structure
 
 ```
