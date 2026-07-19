@@ -397,6 +397,40 @@ for recommendation in report.recommendations:
 
 The engine is intentionally independent from FastAPI and the analysis pipeline. A future, opt-in LLM enhancement could improve wording, but should retain these deterministic evidence and safety boundaries.
 
+## Analysis Pipeline (Milestone 9)
+
+`ai_engine.pipeline.AnalysisPipeline` is the single reusable backend entry point for a complete deterministic analysis. It is a thin orchestration layer: parser, extraction, feature, comparison, scoring, and recommendation business logic remains in the existing modules.
+
+```
+resume path or text + job-description text
+                    |
+                    v
+             AnalysisPipeline
+                    |
+     parser -> extraction -> features
+                    |
+     comparison -> scoring -> recommendations
+                    |
+                    v
+       PipelineAnalysisReport
+```
+
+```python
+from ai_engine.pipeline import AnalysisPipeline, PipelineConfig
+
+pipeline = AnalysisPipeline(PipelineConfig(enable_recommendations=True))
+report = pipeline.analyze(
+    resume_path="resume.pdf",
+    job_description_text="Required Skills: Python, FastAPI",
+)
+```
+
+Callers may provide `resume_text` instead of `resume_path`; exactly one is required. The immutable `PipelineAnalysisReport` retains resume and job features, comparison output, ATS score, recommendation report, deduplicated warnings, parser/plugin metadata, processing time, and pipeline version. Disabled stages are represented by `None` rather than fabricated results. Disabling an upstream stage safely skips dependent stages and records a warning.
+
+`PipelineConfig` controls comparison, scoring, recommendations, metadata collection, and the pipeline version. Invalid inputs raise `InputValidationError`. Unexpected engine failures raise `PipelineStageError`, identify the failed stage, and preserve the original exception as `__cause__` without putting stack traces or document contents in report objects.
+
+FastAPI integration is intentionally deferred to Milestone 10. The current `/analyze` stub remains unchanged.
+
 ## Project Structure
 
 ```
