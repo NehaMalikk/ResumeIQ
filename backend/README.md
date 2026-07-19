@@ -526,3 +526,35 @@ alembic upgrade head
 3. Define SQLAlchemy models and run Alembic migrations
 4. ~~Implement document parsers in `ai_engine/parsers/`~~ (Milestone 1 complete)
 5. Connect frontend `VITE_API_BASE_URL` to `http://localhost:8000`
+# Deterministic matching accuracy
+
+The analysis pipeline canonicalizes the same bounded skill vocabulary on both
+the resume and job-description sides. Variants such as `React.js`/`ReactJS`,
+`RESTful APIs`/`REST APIs`, `HTML5`, `CSS3`, `NextJS`, and `Tailwind` resolve to
+one canonical value. Boundary-aware extraction keeps Java separate from
+JavaScript and C separate from C++ and C#. Resume evidence is collected from
+skills, experience, and project text; a technology is never inferred merely
+from an adjacent tool or role.
+
+Job skills retain required, preferred, and nice-to-have classification.
+`Redux or Context API` is scored as one alternative requirement, so either
+technology satisfies the group. Education comparison normalizes degree level
+and checks a controlled computing-field group; a B.Tech in Information
+Technology therefore meets a bachelor's-in-CS-or-related requirement, while an
+unrelated bachelor's degree does not. Recognized month ranges are converted to
+non-overlapping inclusive months, and experience credit is the candidate total
+divided by the minimum requested experience, capped at full credit.
+
+Responsibilities and projects use explainable controlled concept groups for
+component reuse, performance/scalability, REST APIs, collaboration, and
+maintainability. Keyword coverage compares unique canonical job terms rather
+than raw counts. Metrics with no job requirement (for example certifications)
+are marked not applicable. Semantic comparison is explicitly disabled in this
+milestone. Neither category contributes points or weight; the ATS denominator
+is normalized across applicable metrics without mutating default weights.
+
+The anonymized frontend-engineer regression verifies exact skills, related
+education, partial internship duration, project/responsibility evidence,
+legitimate Git and Redux/Context gaps, stable recommendations, and deterministic
+output. These rules improve exact deterministic correctness but do not provide
+semantic understanding; semantic matching remains future work.

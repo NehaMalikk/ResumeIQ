@@ -34,7 +34,7 @@ Employment Type: Full-time
 
     assert job.title == "Senior Backend Engineer"
     assert [(skill.name, skill.category) for skill in job.required_skills] == [
-        ("Python", "Programming Language"), ("FastAPI", "Framework"), ("Docker", "DevOps")
+        ("Python", "Programming Language"), ("FastAPI", "Framework"), ("Docker", "DevOps"), ("REST API", "API")
     ]
     assert [skill.name for skill in job.preferred_skills] == ["AWS", "Kubernetes"]
     assert [item.text for item in job.responsibilities] == ["Build REST APIs", "Design scalable backend systems"]
@@ -52,7 +52,7 @@ def test_parses_frontend_backend_and_ai_specializations() -> None:
     backend = parser.parse("Backend Developer\nRequirements\nPython, Django, PostgreSQL\n5 years of experience")
     ai = parser.parse("AI Engineer\nRequired Skills\nPython\nPyTorch\nHugging Face\nNice to Have\nAWS")
 
-    assert [item.name for item in frontend.required_skills] == ["React", "TypeScript"]
+    assert [item.name for item in frontend.required_skills] == ["React", "TypeScript", "CSS"]
     assert [item.name for item in backend.required_skills] == ["Python", "Django", "PostgreSQL"]
     assert backend.experience_required == "5 years of experience"
     assert [item.name for item in ai.required_skills] == ["Python", "PyTorch", "Hugging Face"]

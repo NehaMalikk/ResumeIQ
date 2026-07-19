@@ -32,8 +32,8 @@ Example University
     assert resume.personal_info.email == "john@example.com"
     assert resume.personal_info.linkedin == "https://linkedin.com/in/johndoe"
     assert [(skill.name, skill.category) for skill in resume.skills] == [
-        ("Python", "Programming Language"), ("FastAPI", "Framework"),
-        ("Docker", "DevOps"), ("PostgreSQL", "Database"),
+        ("GitHub", "Version Control"), ("Python", "Programming Language"), ("FastAPI", "Framework"),
+        ("Docker", "DevOps"), ("PostgreSQL", "Database"), ("REST API", "API"),
     ]
     assert resume.experience[0].company == "ABC Technologies"
     assert resume.experience[0].title == "Backend Developer"

@@ -38,6 +38,10 @@ class ResumeFeatures(FeatureModel):
     technical_strength: FeatureValue
     resume_length_words: FeatureValue
     estimated_pages: FeatureValue
+    education_details: FeatureValue
+    project_evidence: FeatureValue
+    responsibility_evidence: FeatureValue
+    keywords: FeatureValue
 
 
 class JobDescriptionFeatures(FeatureModel):
@@ -50,3 +54,7 @@ class JobDescriptionFeatures(FeatureModel):
     education_level: FeatureValue
     responsibility_count: FeatureValue
     keyword_count: FeatureValue
+    education_requirement: FeatureValue
+    responsibilities: FeatureValue
+    keywords: FeatureValue
+    certification_requirements: FeatureValue

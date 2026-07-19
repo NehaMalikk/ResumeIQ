@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from collections.abc import Iterable
 from ai_engine.comparison.base_comparator import BaseComparator
 from ai_engine.comparison.comparison_models import ComparisonResult
-from ai_engine.comparison.comparators import CertificationComparator, EducationComparator, ExperienceComparator, KeywordComparator, ProjectComparator, ResponsibilityComparator, SkillComparator
+from ai_engine.comparison.comparators import CertificationComparator, EducationComparator, ExperienceComparator, KeywordComparator, ProjectComparator, ResponsibilityComparator, SemanticComparator, SkillComparator
 from ai_engine.features.feature_models import JobDescriptionFeatures, ResumeFeatures
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class ComparisonWeights:
 class ComparisonEngine:
     """Run registered plugins; plugin names and weights are the extension seam."""
     def __init__(self, comparators: Iterable[BaseComparator] | None = None, weights: ComparisonWeights | None = None) -> None:
-        self._comparators = list(comparators) if comparators is not None else [SkillComparator(), ExperienceComparator(), EducationComparator(), ProjectComparator(), CertificationComparator(), KeywordComparator(), ResponsibilityComparator()]
+        self._comparators = list(comparators) if comparators is not None else [SkillComparator(), ExperienceComparator(), EducationComparator(), ProjectComparator(), CertificationComparator(), KeywordComparator(), ResponsibilityComparator(), SemanticComparator()]
         self._weights = (weights or ComparisonWeights()).values
     def compare(self, resume_features: ResumeFeatures, jd_features: JobDescriptionFeatures) -> ComparisonResult:
         logger.info("Comparison started")

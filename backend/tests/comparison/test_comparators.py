@@ -26,7 +26,7 @@ def test_count_and_level_comparators_are_deterministic() -> None:
     resume, job = _vectors()
     assert ExperienceComparator().compare(resume, job).score == 100  # type: ignore[arg-type]
     assert EducationComparator().compare(resume, job).score == 100  # type: ignore[arg-type]
-    assert ProjectComparator().compare(resume, job).score == 100  # type: ignore[arg-type]
+    assert ProjectComparator().compare(resume, job).score == 0  # no job evidence to establish relevance
     assert KeywordComparator().compare(resume, job).score == 0  # type: ignore[arg-type]
     assert ResponsibilityComparator().compare(resume, job).score == 100  # type: ignore[arg-type]
     certification = CertificationComparator().compare(resume, job)  # type: ignore[arg-type]

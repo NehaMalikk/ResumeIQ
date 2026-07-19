@@ -56,7 +56,9 @@ class ResumeParser:
         resume = Resume(
             personal_info=self.extract_personal_info(preamble or normalized),
             summary=self.extract_summary(sections.get("summary", [])),
-            skills=self.extract_skills(sections.get("skills", [])),
+            # Technologies demonstrated in work and projects are valid evidence,
+            # not merely those repeated under a conventional Skills heading.
+            skills=self.extract_skills(normalized.splitlines()),
             experience=self.extract_experience(sections.get("experience", [])),
             projects=self.extract_projects(sections.get("projects", [])),
             education=self.extract_education(sections.get("education", [])),

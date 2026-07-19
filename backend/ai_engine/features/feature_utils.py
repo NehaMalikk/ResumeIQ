@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 import re
+from datetime import date, datetime
 from collections.abc import Iterable
 
 
@@ -31,6 +32,18 @@ def parse_experience_years(text: str | None) -> float | None:
     if not text: return None
     match = re.search(r"(\d+(?:\.\d+)?)\s*(?:-|–|—|to)?\s*(?:\d+(?:\.\d+)?)?\+?\s*(?:years?|yrs?)", text, re.I)
     return float(match.group(1)) if match else None
+
+
+def parse_month(text: str | None, reference: date | None = None) -> date | None:
+    """Parse common resume month representations into the first of a month."""
+    if not text: return None
+    if text.strip().casefold() in {"present", "current", "now"}:
+        value = reference or date.today(); return value.replace(day=1)
+    value = text.strip()
+    for fmt in ("%B %Y", "%b %Y", "%m/%Y", "%Y-%m", "%Y"):
+        try: return datetime.strptime(value, fmt).date().replace(day=1)
+        except ValueError: pass
+    return None
 
 
 def word_count(text: str) -> int:

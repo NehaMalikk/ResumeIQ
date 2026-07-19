@@ -57,12 +57,14 @@ class ATSScoringEngine:
                 warnings.append("Comparison metrics are malformed; treating them as empty.")
                 metrics = []
 
-            values, confidences = self._read_metrics(metrics, warnings)
-            contributions = {category: round(values[category] * self._weights[category], 2) for category in _CATEGORIES}
+            values, confidences, applicable = self._read_metrics(metrics, warnings)
+            active_weight = sum(self._weights[name] for name in applicable)
+            effective_weights = {name: (self._weights[name] / active_weight if name in applicable and active_weight else 0.0) for name in _CATEGORIES}
+            contributions = {category: round(values[category] * effective_weights[category], 2) for category in _CATEGORIES}
             category_scores = {category: round(values[category], 2) for category in _CATEGORIES}
             overall_score = round(max(0.0, min(100.0, sum(contributions.values()))), 2)
             confidence = self._confidence(confidences, warnings)
-            breakdown = ScoreBreakdown.build(contributions, self._weights)
+            breakdown = ScoreBreakdown.build(contributions, effective_weights)
             result = ATSScore(
                 overall_score=overall_score,
                 skills_score=category_scores["skills"], experience_score=category_scores["experience"],
@@ -83,10 +85,11 @@ class ATSScoringEngine:
         logger.info("ATS scoring completed in %sms", elapsed_ms)
         return result
 
-    def _read_metrics(self, metrics: list[Any] | tuple[Any, ...], warnings: list[str]) -> tuple[dict[str, float], list[float]]:
+    def _read_metrics(self, metrics: list[Any] | tuple[Any, ...], warnings: list[str]) -> tuple[dict[str, float], list[float], set[str]]:
         scores = {category: 0.0 for category in _CATEGORIES}
         confidences: list[float] = []
         seen: set[str] = set()
+        applicable: set[str] = set()
         for metric in metrics:
             name = metric.get("name") if isinstance(metric, Mapping) else getattr(metric, "name", None)
             if not isinstance(name, str):
@@ -101,19 +104,23 @@ class ATSScoringEngine:
                 continue
             raw_score = metric.get("score") if isinstance(metric, Mapping) else getattr(metric, "score", None)
             raw_confidence = metric.get("confidence") if isinstance(metric, Mapping) else getattr(metric, "confidence", None)
+            metadata = metric.get("metadata", {}) if isinstance(metric, Mapping) else getattr(metric, "metadata", {})
             score = _clamp(raw_score)
             confidence = _clamp(raw_confidence, 1.0)
             if score is None or confidence is None:
                 warnings.append(f"Ignoring malformed '{category}' comparison metric.")
                 continue
             scores[category] = score
-            confidences.append(confidence)
+            is_applicable = not isinstance(metadata, Mapping) or metadata.get("applicable", True) is not False
+            if is_applicable:
+                applicable.add(category); confidences.append(confidence)
             seen.add(category)
 
         for category in _CATEGORIES:
             if category not in seen:
                 warnings.append(f"Missing comparison output for '{category}'; scored as 0.")
-        return scores, confidences
+                applicable.add(category)
+        return scores, confidences, applicable
 
     @staticmethod
     def _confidence(metric_confidences: list[float], warnings: list[str]) -> float:

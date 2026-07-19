@@ -30,18 +30,31 @@ def build_resume_features(resume: Resume) -> ResumeFeatures:
         section_completeness=feature(section_completeness(present, 8), source, 1.0, {"present_sections": present, "total_sections": 8}),
         technical_strength=feature(technical_strength(len(skills), len(categories), len(resume.projects), years, len(resume.certifications)), source, 1.0, {"skill_diversity": len(skills), "category_diversity": len(categories)}),
         resume_length_words=feature(word_count(resume.raw_text), "Raw resume text"), estimated_pages=feature(estimate_pages(word_count(resume.raw_text)), "Raw resume text"),
+        education_details=feature([" ".join(filter(None, (item.degree, item.field_of_study))) for item in resume.education], "Education section"),
+        project_evidence=feature([" ".join(filter(None, (item.name, *item.technologies, *item.description))) for item in resume.projects], "Projects section"),
+        responsibility_evidence=feature([text for item in resume.experience for text in item.description] + [text for item in resume.projects for text in item.description], "Experience and projects sections"),
+        keywords=feature(_evidence_keywords(resume), "Normalized resume evidence"),
     )
 
 
 def _experience_years(resume: Resume) -> float | None:
-    """Conservatively sum explicit year-only ranges; ambiguous dates stay absent."""
-    total = 0.0
-    found = False
+    """Sum non-overlapping recognized month ranges, inclusive of both months."""
+    from datetime import date
+    from ai_engine.features.feature_utils import parse_month
+    ranges = []
     for item in resume.experience:
-        if item.start_date and item.end_date:
-            import re
-            start, end = re.search(r"\b(19|20)\d{2}\b", item.start_date), re.search(r"\b(19|20)\d{2}\b", item.end_date)
-            if start and end:
-                total += max(0, int(end.group()) - int(start.group()))
-                found = True
-    return total if found else None
+        if item.start_date and item.end_date and item.start_date.strip().isdigit() and item.end_date.strip().isdigit():
+            ranges.extend((year * 12 + 1, year * 12 + 12) for year in range(int(item.start_date), int(item.end_date)))
+            continue
+        start, end = parse_month(item.start_date), parse_month(item.end_date, reference=date.today())
+        if start and end and end >= start:
+            ranges.append((start.year * 12 + start.month, end.year * 12 + end.month))
+    months: set[int] = set()
+    for start, end in ranges: months.update(range(start, end + 1))
+    return round(len(months) / 12, 2) if ranges else None
+
+
+def _evidence_keywords(resume: Resume) -> list[str]:
+    text = resume.raw_text.casefold()
+    concepts = {"responsive": ("responsive",), "frontend": ("frontend",), "reusable components": ("reusable", "component"), "performance": ("performance", "page load", "bottleneck"), "scalability": ("scalable", "scalability"), "collaboration": ("collaborat", "cross-functional", "backend engineer"), "maintainability": ("maintainab", "modular")}
+    return [*dict.fromkeys([skill.name for skill in resume.skills] + [name for name, aliases in concepts.items() if any(alias in text for alias in aliases)])]

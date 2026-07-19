@@ -15,6 +15,6 @@ def test_skill_comparator_perfect_partial_and_no_match() -> None:
 
 def test_orchestrator_handles_empty_and_malformed_features() -> None:
     builder = FeatureBuilder(); result = ComparisonEngine().compare(builder.build_resume_features(Resume()), builder.build_job_features(JobDescription()))
-    assert result.overall_score >= 0 and len(result.metrics) == 7
+    assert result.overall_score >= 0 and len(result.metrics) == 8
     semantic = SemanticComparator().compare(builder.build_resume_features(Resume()), builder.build_job_features(JobDescription()))
     assert semantic.confidence == 0 and semantic.metadata["implemented"] is False

@@ -37,9 +37,12 @@ class JobDescriptionParser:
             required_text = self._section_text(sections, "required_skills", "requirements")
             preferred_text = self._section_text(sections, "preferred_skills")
             nice_text = self._section_text(sections, "nice_to_have_skills")
-            required_skills = self._skills(required_text)
-            preferred_skills = self._skills(preferred_text, exclude=required_skills)
-            nice_skills = self._skills(nice_text, exclude=[*required_skills, *preferred_skills])
+            preferred_skills = self._skills(preferred_text)
+            nice_skills = self._skills(nice_text, exclude=preferred_skills)
+            # Role summaries and responsibilities frequently carry mandatory
+            # technology evidence even when there is no "Required skills" list.
+            core_text = "\n".join([preamble, *["\n".join(lines) for name, lines in sections.items() if name not in {"preferred_skills", "nice_to_have_skills"}]])
+            required_skills = self._skills(core_text, exclude=[*preferred_skills, *nice_skills])
             logger.info("Skills extracted: required=%d preferred=%d nice_to_have=%d", len(required_skills), len(preferred_skills), len(nice_skills))
             responsibilities = self._items(sections.get("responsibilities", []), JobResponsibility)
             logger.info("Responsibilities extracted: %d", len(responsibilities))

@@ -21,4 +21,5 @@ def build_job_features(job: JobDescription) -> JobDescriptionFeatures:
         preferred_skill_count=feature(len(preferred), "Preferred skills section"), minimum_experience=feature(years, "Experience section", 1.0 if years is not None else 0.0),
         education_level=feature(education, "Education section", 1.0 if education != "Unknown" else 0.0),
         responsibility_count=feature(len(job.responsibilities), "Responsibilities section"), keyword_count=feature(len(job.keywords), "Keywords extracted from job description"),
+        education_requirement=feature(job.education_required, "Education requirement"), responsibilities=feature([item.text for item in job.responsibilities], "Responsibilities section"), keywords=feature(job.keywords, "Normalized job keywords"), certification_requirements=feature(job.certifications, "Certification requirements"),
     )

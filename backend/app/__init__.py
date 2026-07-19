@@ -1,5 +1,12 @@
-"""HireMatch AI application package."""
+"""HireMatch AI application package with a cycle-safe public factory."""
 
-from app.core.application import create_app
+from typing import Any
 
 __all__ = ["create_app"]
+
+
+def __getattr__(name: str) -> Any:
+    if name == "create_app":
+        from app.core.application import create_app
+        return create_app
+    raise AttributeError(name)
