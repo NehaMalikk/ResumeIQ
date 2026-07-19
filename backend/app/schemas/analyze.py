@@ -1,10 +1,32 @@
-"""Resume analysis request and response schemas."""
+"""Public response schemas for resume analysis."""
+from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class AnalyzeResponse(BaseModel):
-    """Placeholder response schema for the analyze endpoint."""
+    """JSON-safe representation of a complete pipeline report."""
 
-    status: str = Field(..., description="Operation status indicator.")
-    message: str = Field(..., description="Human-readable response message.")
+    model_config = ConfigDict(json_schema_extra={"example": {
+        "metadata": {"parser_used": "PDFParser", "comparison_plugins_used": ["skills"]},
+        "ats_score": {"overall_score": 82.5}, "comparison": {"overall_score": 80.0},
+        "recommendations": {"summary": "Strong alignment."},
+        "resume_features": {}, "job_features": {}, "warnings": [],
+        "processing_time_ms": 24.1, "pipeline_version": "1.0",
+    }})
+
+    metadata: dict[str, Any] = Field(description="Non-sensitive pipeline execution metadata.")
+    ats_score: dict[str, Any] | None
+    comparison: dict[str, Any] | None
+    recommendations: dict[str, Any] | None
+    resume_features: dict[str, Any]
+    job_features: dict[str, Any]
+    warnings: list[str]
+    processing_time_ms: float
+    pipeline_version: str
+
+
+class AnalyzeErrorResponse(BaseModel):
+    """Standard JSON error body returned by FastAPI."""
+
+    detail: str

@@ -1,26 +1,21 @@
-"""Resume analysis service layer."""
+"""Thin application adapter for the analysis pipeline."""
+from os import PathLike
 
+from ai_engine.pipeline import AnalysisPipeline, PipelineAnalysisReport
 from app.core.logging import get_logger
-from app.schemas.analyze import AnalyzeResponse
 
 logger = get_logger(__name__)
 
 
 class AnalysisService:
-    """Orchestrates resume analysis workflows.
+    """Expose the pipeline to the HTTP layer without duplicating orchestration."""
 
-    This service will coordinate the AI engine pipeline (parsing, extraction,
-    matching, scoring, and suggestions) once implemented.
-    """
+    def __init__(self, pipeline: AnalysisPipeline | None = None) -> None:
+        self._pipeline = pipeline or AnalysisPipeline()
 
-    def analyze(self) -> AnalyzeResponse:
-        """Execute the resume analysis pipeline.
-
-        Returns:
-            AnalyzeResponse: Placeholder response until the AI pipeline is wired.
-        """
-        logger.info("Analyze request received — pipeline not yet implemented")
-        return AnalyzeResponse(
-            status="success",
-            message="Resume Analyzer pipeline will be implemented here.",
-        )
+    def analyze(self, resume_path: str | PathLike[str], job_description: str) -> PipelineAnalysisReport:
+        """Delegate one request directly to :class:`AnalysisPipeline`."""
+        logger.info("Analysis pipeline execution started")
+        report = self._pipeline.analyze(resume_path=resume_path, job_description_text=job_description)
+        logger.info("Analysis pipeline execution finished in %sms", report.processing_time_ms)
+        return report

@@ -429,7 +429,23 @@ Callers may provide `resume_text` instead of `resume_path`; exactly one is requi
 
 `PipelineConfig` controls comparison, scoring, recommendations, metadata collection, and the pipeline version. Invalid inputs raise `InputValidationError`. Unexpected engine failures raise `PipelineStageError`, identify the failed stage, and preserve the original exception as `__cause__` without putting stack traces or document contents in report objects.
 
-FastAPI integration is intentionally deferred to Milestone 10. The current `/analyze` stub remains unchanged.
+## FastAPI Analysis Integration (Milestone 10)
+
+`POST /analyze` is the multipart HTTP entry point for the existing `AnalysisPipeline`. The route contains no parsing, extraction, comparison, scoring, or recommendation logic.
+
+```bash
+curl -X POST http://localhost:8000/analyze \
+  -F "resume=@resume.pdf" \
+  -F "job_description=Required Skills: Python, FastAPI"
+```
+
+Both fields are required. `resume` accepts the formats supported by `ParserFactory`; `job_description` must contain non-whitespace text. The uploaded file is streamed to a uniquely named operating-system temporary file because document parsers consume filesystem paths. Cleanup runs in a `finally` block after success or failure, and uploaded resumes are never retained.
+
+The response exposes `metadata`, `ats_score`, `comparison`, `recommendations`, `resume_features`, `job_features`, `warnings`, `processing_time_ms`, and `pipeline_version`. A recursive transport serializer converts frozen dataclasses, Pydantic models, tuples, and read-only mappings into JSON-safe objects without changing pipeline models.
+
+Input validation errors return HTTP 400, unsupported extensions return HTTP 415, and pipeline or unexpected failures return safe HTTP 500 JSON responses without tracebacks or document contents. Missing multipart fields use FastAPI's standard HTTP 422 JSON validation response.
+
+Interactive request and response documentation is available at `/docs`; select `POST /analyze`, choose a resume file, enter the job description, and use **Execute**.
 
 ## Project Structure
 
