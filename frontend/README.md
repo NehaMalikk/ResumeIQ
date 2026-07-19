@@ -1,52 +1,50 @@
-# ResumeIQ
+# HireMatch AI frontend
 
-AI-powered resume analyzer frontend — premium SaaS landing experience built with React, TypeScript, and Tailwind CSS.
+React 19 and TypeScript frontend for analyzing a resume against a pasted job description.
 
-## Tech Stack
+## Analyzer flow
 
-- React 19 + TypeScript
-- Tailwind CSS v4
-- shadcn/ui patterns (Button, Card, Badge)
-- Framer Motion
-- Lucide React
-- Recharts (ready for dashboard charts)
-- Zustand
-- React Router v7
+The browser temporarily holds the selected resume `File` and sends `POST /api/analyze` as `multipart/form-data`. The request contains exactly:
 
-## Getting Started
+- `resume`: the uploaded resume file
+- `job_description`: trimmed plain text
+
+The browser supplies the multipart boundary. The returned report is held only in `LandingPage` React state and drives the ATS score, comparison, recommendations, strengths, warnings, and processing details shown on screen. Refreshing the page clears the selected file and result. Nothing is written to local storage, session storage, IndexedDB, a database, or cloud storage; the backend deletes its temporary upload after processing.
+
+Job descriptions are text-only in this milestone. File upload and browser-side PDF/DOCX parsing are intentionally unavailable.
+
+Supported resume formats match the backend parser factory: PDF, DOC, DOCX, TXT, PNG, JPG, and JPEG. The UI applies a 5 MB convenience limit; backend validation remains authoritative.
+
+## Local development
+
+Start the backend:
 
 ```bash
-cd resumeiq
+cd backend
+python -m uvicorn app.main:app --reload
+```
+
+In another terminal, start the frontend:
+
+```bash
+cd frontend
 npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173).
-
-## Project Structure
-
-```
-src/
-├── components/   # UI + landing sections
-├── pages/        # Route pages
-├── layouts/      # Page layouts
-├── hooks/        # Custom hooks
-├── store/        # Zustand stores
-├── services/     # API layer (backend-ready)
-├── utils/        # Utilities (cn, etc.)
-├── data/         # Mock JSON data
-├── assets/       # Static assets
-└── types/        # TypeScript types
-```
+Open [http://localhost:5173](http://localhost:5173). Vite proxies `/api/*` to `http://127.0.0.1:8000/*`, so `/api/analyze` reaches the backend `/analyze` route without local CORS configuration.
 
 ## Environment
 
-| Variable | Description |
-|----------|-------------|
-| `VITE_API_BASE_URL` | Backend API base URL (default: `/api`) |
+Copy `.env.example` when an override is needed. `VITE_API_BASE_URL` defaults to `/api`; deployed environments can set it to their API origin. Trailing slashes are normalized. Do not commit real `.env` files or secrets.
+
+## Errors and cancellation
+
+HTTP 400, 415, 422, and 500 responses are mapped to safe user messages. Safe backend string details are retained for client errors; raw objects, HTML, stack traces, and internal server details are not displayed. Network failures are reported separately. Changing either input or unmounting the analyzer aborts the active request, clears an old result, and prevents stale responses from appearing.
 
 ## Scripts
 
-- `npm run dev` — Start dev server
-- `npm run build` — Production build
-- `npm run preview` — Preview production build
+- `npm run dev` — start Vite
+- `npm run lint` — run ESLint
+- `npm run build` — type-check and create a production build
+- `npm run preview` — preview the production build

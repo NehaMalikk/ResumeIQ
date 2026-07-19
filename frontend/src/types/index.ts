@@ -1,5 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 
+export type * from './analysis'
+
 export interface Feature {
   id: string
   title: string

@@ -2,27 +2,28 @@ import { useEffect, useRef, useState } from 'react'
 import { AnalysisResultsSection } from '@/components/landing/AnalysisResultsSection'
 import { AnalyzerUploadSection } from '@/components/landing/AnalyzerUploadSection'
 import { HeroSection } from '@/components/landing/HeroSection'
+import type { AnalyzeResponse } from '@/types'
 
 export function LandingPage() {
-  const [showResults, setShowResults] = useState(false)
+  const [analysisResult, setAnalysisResult] = useState<AnalyzeResponse | null>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (showResults && resultsRef.current) {
+    if (analysisResult && resultsRef.current) {
       resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
-  }, [showResults])
+  }, [analysisResult])
 
   return (
     <>
       <HeroSection />
       <AnalyzerUploadSection
-        onAnalysisComplete={() => setShowResults(true)}
-        onAnalysisReset={() => setShowResults(false)}
+        onAnalysisComplete={setAnalysisResult}
+        onAnalysisReset={() => setAnalysisResult(null)}
       />
-      {showResults && (
+      {analysisResult && (
         <div ref={resultsRef}>
-          <AnalysisResultsSection />
+          <AnalysisResultsSection result={analysisResult} />
         </div>
       )}
     </>
